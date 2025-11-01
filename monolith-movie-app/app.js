@@ -1,6 +1,13 @@
 const express = require("express");
 const app = express();
 app.use(express.json());
+const pino = require("pino");
+const logger = pino({
+  transport: {
+    target: "pino-pretty",
+    options: { colorize: true }
+  }
+});
 
 // our "database" data
 let users = [
@@ -19,11 +26,16 @@ let reviews = [
   { id: 3, movieId: 2, userId: 1, text: "Classic sci-fi." }
 ];
 
-app.get("/movies", (req, res) => res.json(movies));
+app.get("/movies", (req, res) => {
+  logger.info(`Request: GET /movies received.`);
+  res.json(movies)
+});
 
 app.get("/movies/:id", (req, res) => {
+  logger.info(`Request: GET /movies/${req.params.id} received.`);
   const movie = movies.find(m => m.id === parseInt(req.params.id));
   if (!movie) {
+    logger.error(`Movie with id: ${req.params.id} was not found.`)
     return res.status(404).json({ error: "Movie not found" });
   }
 
@@ -40,28 +52,39 @@ app.get("/movies/:id", (req, res) => {
 });
 
 app.get("/reviews/:id", (req, res) => {
+  logger.info(`Request: GET /reviews/${req.params.id} received.`);
   const review = reviews.find(r => r.id === parseInt(req.params.id));
   if (review) {
     res.json(review);
   } else {
+    logger.error(`Review with id: ${req.params.id} was not found.`)
     res.status(404).json({ error: "Review not found" });
   }
 });
 
-app.get("/users", (req, res) => res.json(users));
+app.get("/users", (req, res) => {
+  logger.info(`Request: GET /users received.`);
+  res.json(users)
+});
 
 app.get("/users/:id", (req, res) => {
+  logger.info(`Request: GET /users/${req.params.id} received.`);
   const user = users.find(u => u.id === parseInt(req.params.id));
   if (user) {
     res.json(user);
   } else {
     res.status(404).json({ error: "User not found" });
+    logger.error(`User with id: ${req.params.id} was not found.`)
   }
 });
 
-app.get("/reviews", (req, res) => res.json(reviews));
+app.get("/reviews", (req, res) => {
+  logger.info(`Request: GET /reviews received.`);
+  res.json(reviews)
+});
 
 app.post("/reviews", (req, res) => {
+  logger.info(`Request: POST /reviews received.`);
   const newReview = { id: reviews.length + 1, ...req.body };
   reviews.push(newReview);
   res.status(201).json(newReview);
