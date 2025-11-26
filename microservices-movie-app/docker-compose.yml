@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass123
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - app-network
+
+  users-service:
+    image: users-service:2.0
+    container_name: users-service
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_HOST=mongodb
+      - JWT_SECRET=secret
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  movies-service:
+    image: movies-service:2.0
+    container_name: movies-service
+    ports:
+      - "5001:5001"
+    environment:
+      - MONGO_HOST=mongodb
+      - REVIEWS_SERVICE_HOST=reviews-service
+    depends_on:
+      - mongodb
+      - reviews-service
+    networks:
+      - app-network
+
+  reviews-service:
+    image: reviews-service:2.0
+    container_name: reviews-service
+    ports:
+      - "5002:5002"
+    environment:
+      - MONGO_HOST=mongodb
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+volumes:
+  mongodb-data:
+
+networks:
+  app-network:
+    driver: bridge
