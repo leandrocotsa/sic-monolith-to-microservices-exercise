@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass123
+    networks:
+      - micro-net
+
+  movies-service:
+    image: movies-service:latest
+    container_name: movies-service
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+    networks:
+      - micro-net
+
+  reviews-service:
+    image: reviews-service:latest
+    container_name: reviews-service
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mongodb
+    networks:
+      - micro-net
+
+  users-service:
+    image: users-service:latest
+    container_name: users-service
+    ports:
+      - "3003:3003"
+    depends_on:
+      - mongodb
+    networks:
+      - micro-net
+
+networks:
+  micro-net:
+    driver: bridge
